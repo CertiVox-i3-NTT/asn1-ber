@@ -172,11 +172,15 @@ func printPacket(out io.Writer, p *Packet, indent int, printBytes bool) {
 
 	tag_str := fmt.Sprintf("0x%02X", p.Tag)
 
+	var value string
 	if p.ClassType == ClassUniversal {
 		tag_str = tagMap[p.Tag]
+		value = fmt.Sprint(p.Value)
+	}else{
+		value = fmt.Sprint(p.Data)
 	}
 
-	value := fmt.Sprint(p.Value)
+
 	description := ""
 
 	if p.Description != "" {
@@ -274,6 +278,10 @@ func DecodePacketErr(data []byte) (*Packet, error) {
 // readPacket reads a single Packet from the reader, returning the number of bytes read
 func readPacket(reader io.Reader) (*Packet, int, error) {
 	identifier, length, read, err := readHeader(reader)
+	if err == io.ErrUnexpectedEOF {
+		return nil, read, io.EOF
+	}
+
 	if err != nil {
 		return nil, read, err
 	}
@@ -329,6 +337,11 @@ func readPacket(reader io.Reader) (*Packet, int, error) {
 		return nil, read, errors.New("indefinite length used with primitive type")
 	}
 
+	// TODO: review limits of length
+	if length < 0 || length > 65536 {
+		return nil, read, errors.New("length out of range")
+	}
+
 	// Read definite-length content
 	content := make([]byte, length, length)
 	if length > 0 {
@@ -349,8 +362,7 @@ func readPacket(reader io.Reader) (*Packet, int, error) {
 		switch p.Tag {
 		case TagEOC:
 		case TagBoolean:
-			val, _ := parseInt64(content)
-
+			val,_ := parseInt64(content)
 			p.Value = val != 0
 		case TagInteger:
 			p.Value, _ = parseInt64(content)

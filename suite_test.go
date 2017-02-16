@@ -23,8 +23,8 @@ var testcases = []struct {
 }{
 	// Common blocks
 	{File: "tests/tc1.ber", Error: "high-tag-number tag overflow"},
-	{File: "tests/tc2.ber", Error: errEOF},
-	{File: "tests/tc3.ber", Error: errEOF},
+	{File: "tests/tc2.ber", Error: io.EOF.Error()},
+	{File: "tests/tc3.ber", Error: io.EOF.Error()},
 	{File: "tests/tc4.ber", Error: "invalid length byte 0xff"},
 	{File: "tests/tc5.ber", Error: "", AbnormalEncoding: true},
 	// Real numbers (some expected failures are disabled until support is added)
@@ -71,7 +71,7 @@ var testcases = []struct {
 	// Octet string (some expected failures are disabled until support is added)
 	{File: "tests/tc41.ber", Error: "", IndefiniteEncoding: true}, // Error: "Using of different from OCTET STRING types as internal types for constructive encoding"
 	{File: "tests/tc42.ber", Error: errEOF},
-	{File: "tests/tc43.ber", Error: errEOF},
+	{File: "tests/tc43.ber", Error: io.EOF.Error()},
 	{File: "tests/tc44.ber", Error: ""},
 	{File: "tests/tc45.ber", Error: ""},
 	// Bitstring
